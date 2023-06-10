@@ -26,8 +26,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="stats"
         options={{
-          title: "stats",
-          tabBarIcon: ({color}) => <TabBarIcon name="pie-chart" color={color}/>,
+          title: "Stats",
+          tabBarIcon: ({ color }) => <TabBarIcon name="pie-chart" color={color} />,
+          headerShown: false
         }}
       />
       <Tabs.Screen
@@ -40,7 +41,7 @@ export default function TabLayout() {
               <Pressable>
                 {({ pressed }) => (
                   <FontAwesome
-                    name="home"
+                    name="info-circle"
                     size={25}
                     color={Colors[colorScheme ?? "light"].text}
                     style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
