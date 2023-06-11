@@ -1,42 +1,46 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
-import { Pressable, useColorScheme } from "react-native";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { Tabs } from "expo-router";
 
 import Colors from "../../constants/Colors";
 
-/**
- * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
- */
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
+  name: React.ComponentProps<typeof FontAwesome5>["name"];
   color: string;
 }) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <FontAwesome5 size={24} {...props} />;
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: Colors.red[500],
+        tabBarInactiveTintColor: Colors.gray[800],
+        tabBarStyle: {
+          backgroundColor: "#000",
+          borderTopWidth: 0,
+        },
+        tabBarShowLabel: false,
       }}
     >
       <Tabs.Screen
         name="stats"
         options={{
           title: "Stats",
-          tabBarIcon: ({ color }) => <TabBarIcon name="pie-chart" color={color} />,
-          headerShown: false
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="chart-pie" color={color} />
+          ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-          headerShown: false
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="dumbbell" color={color} />
+          ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -44,7 +48,7 @@ export default function TabLayout() {
         options={{
           title: "Options",
           tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
-          headerShown: false
+          headerShown: false,
         }}
       />
     </Tabs>
