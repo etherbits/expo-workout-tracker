@@ -36,20 +36,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? "light"].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+          headerShown: false
         }}
       />
       <Tabs.Screen
@@ -57,6 +44,7 @@ export default function TabLayout() {
         options={{
           title: "Options",
           tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
+          headerShown: false
         }}
       />
     </Tabs>
