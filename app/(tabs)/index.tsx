@@ -1,19 +1,35 @@
-import { Pressable, StatusBar, StyleSheet } from "react-native";
+import { Pressable, ScrollView, StatusBar, StyleSheet } from "react-native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 import { Text, View } from "react-native";
 import Colors from "../../constants/Colors";
+import { useState } from "react";
+import { Audio } from "expo-av";
 
 export default function TabOneScreen() {
+  const [workouts, setWorkouts] = useState<string[]>([]);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Workouts</Text>
-      <View style={styles.boxList}>
-        <View style={styles.box}>
-          <Text style={styles.boxText}>Upper Body Workout</Text>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.boxList}>
+          {workouts.map((workout, i) => (
+            <View key={i} style={styles.box}>
+              <Text style={styles.boxText}>{workout}</Text>
+            </View>
+          ))}
         </View>
-      </View>
-      <Pressable style={styles.addButton}>
+      </ScrollView>
+      <Pressable
+        onPress={async () => {
+          const { sound } = await Audio.Sound.createAsync(
+            require("../../assets/sounds/tap.wav")
+          );
+          sound.playAsync();
+          setWorkouts([...workouts, "workout #" + workouts.length]);
+        }}
+        style={styles.addButton}
+      >
         <FontAwesome5 size={24} color={Colors.gray[50]} name="plus" />
       </Pressable>
     </View>
@@ -28,6 +44,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     paddingTop: StatusBar.currentHeight || 0 + 16,
     padding: 16,
+    overflow: "scroll",
   },
   title: {
     fontSize: 32,
@@ -39,6 +56,9 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 18,
     color: Colors.gray[50],
+  },
+  scrollView: {
+    width: "100%",
   },
   boxList: {
     width: "100%",
