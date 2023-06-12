@@ -92,7 +92,7 @@ export default function TabOneScreen() {
 
           db.transaction(
             (tx) => {
-              tx.executeSql('INSERT into workouts (label) values ("workout")');
+              tx.executeSql(`INSERT into workouts (label) values ("workout ${workouts.length}")`);
               tx.executeSql(
                 "Select * from workouts",
                 [],
