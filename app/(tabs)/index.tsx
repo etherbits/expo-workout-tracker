@@ -12,6 +12,7 @@ import Colors from "../../constants/Colors";
 import { useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import * as SQLite from "expo-sqlite";
+import { Link } from "expo-router";
 
 function openDatabase() {
   if (Platform.OS === "web") {
@@ -99,12 +100,14 @@ export default function TabOneScreen() {
       <ScrollView style={styles.scrollView}>
         <View style={styles.boxList}>
           {workouts.map((workout) => (
-            <View key={workout.id} style={styles.box}>
+
+            <Link href={`/workout/${workout.id}`} key={workout.id} style={styles.box}>
               <Text style={styles.boxText}>{workout.label}</Text>
               <Pressable onPress={() => removeWorkout(workout.id)}>
                 <FontAwesome5 size={24} color={Colors.red[500]} name="window-close" />
               </Pressable>
-            </View>
+            </Link>
+
           ))}
         </View>
       </ScrollView>
