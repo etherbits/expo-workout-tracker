@@ -47,6 +47,13 @@ export default function TabOneScreen() {
         tx.executeSql(
           "create TABLE if not EXISTS workouts (id integer primary key not null, label text);"
         );
+        tx.executeSql(
+          "Select * from workouts",
+          [],
+          (_, { rows: { _array: workouts } }) => {
+            setWorkouts(workouts);
+          }
+        );
       },
       (err) => {
         console.log(err);
@@ -79,7 +86,7 @@ export default function TabOneScreen() {
 
     db.transaction(
       (tx) => {
-        tx.executeSql(`INSERT into workouts (label) values ("workout ${workouts.length}")`);
+        tx.executeSql(`INSERT into workouts (label) values ("workout ${workouts.length + 1}")`);
         tx.executeSql(
           "Select * from workouts",
           [],
