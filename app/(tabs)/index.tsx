@@ -56,6 +56,43 @@ export default function TabOneScreen() {
     );
   }, []);
 
+  const removeWorkout = (workoutId: number) => {
+    db.transaction((tx) => {
+      tx.executeSql('DELETE FROM workouts WHERE id = ?', [workoutId])
+      tx.executeSql(
+        "Select * from workouts",
+        [],
+        (_, { rows: { _array: workouts } }) => {
+          setWorkouts(workouts);
+        }
+      );
+    })
+  }
+
+  const addWorkout = async () => {
+    const { sound } = await Audio.Sound.createAsync(
+      require("../../assets/sounds/tap.wav")
+    );
+    sound.playAsync();
+    console.log("click");
+
+    db.transaction(
+      (tx) => {
+        tx.executeSql(`INSERT into workouts (label) values ("workout ${workouts.length}")`);
+        tx.executeSql(
+          "Select * from workouts",
+          [],
+          (_, { rows: { _array: workouts } }) => {
+            setWorkouts(workouts);
+          }
+        );
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Workouts</Text>
@@ -64,18 +101,7 @@ export default function TabOneScreen() {
           {workouts.map((workout) => (
             <View key={workout.id} style={styles.box}>
               <Text style={styles.boxText}>{workout.label}</Text>
-              <Pressable onPress={() => {
-                db.transaction((tx) => {
-                  tx.executeSql('DELETE FROM workouts WHERE id = ?', [workout.id])
-                  tx.executeSql(
-                    "Select * from workouts",
-                    [],
-                    (_, { rows: { _array: workouts } }) => {
-                      setWorkouts(workouts);
-                    }
-                  );
-                })
-              }}>
+              <Pressable onPress={() => removeWorkout(workout.id)}>
                 <FontAwesome5 size={24} color={Colors.red[500]} name="window-close" />
               </Pressable>
             </View>
@@ -83,29 +109,7 @@ export default function TabOneScreen() {
         </View>
       </ScrollView>
       <Pressable
-        onPress={async () => {
-          const { sound } = await Audio.Sound.createAsync(
-            require("../../assets/sounds/tap.wav")
-          );
-          sound.playAsync();
-          console.log("click");
-
-          db.transaction(
-            (tx) => {
-              tx.executeSql(`INSERT into workouts (label) values ("workout ${workouts.length}")`);
-              tx.executeSql(
-                "Select * from workouts",
-                [],
-                (_, { rows: { _array: workouts } }) => {
-                  setWorkouts(workouts);
-                }
-              );
-            },
-            (err) => {
-              console.log(err);
-            }
-          );
-        }}
+        onPress={addWorkout}
         style={styles.addButton}
       >
         <FontAwesome5 size={24} color={Colors.gray[50]} name="plus" />
