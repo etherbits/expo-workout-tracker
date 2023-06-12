@@ -1,21 +1,83 @@
-import { Pressable, ScrollView, StatusBar, StyleSheet } from "react-native";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+} from "react-native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 import { Text, View } from "react-native";
 import Colors from "../../constants/Colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Audio } from "expo-av";
+import * as SQLite from "expo-sqlite";
+
+function openDatabase() {
+  if (Platform.OS === "web") {
+    return {
+      transaction: () => {
+        return {
+          executeSql: () => { },
+        };
+      },
+    };
+  }
+
+  const db = SQLite.openDatabase("db.db");
+  return db;
+}
+
+const db = openDatabase();
+
+type workout = {
+  id: number;
+  label: string;
+};
 
 export default function TabOneScreen() {
-  const [workouts, setWorkouts] = useState<string[]>([]);
+  const [workouts, setWorkouts] = useState<workout[]>([]);
+
+  useEffect(() => {
+    console.log("running...");
+
+    db.transaction(
+      (tx) => {
+        tx.executeSql(
+          "create TABLE if not EXISTS workouts (id integer primary key not null, label text);"
+        );
+      },
+      (err) => {
+        console.log(err);
+      },
+      () => {
+        console.log("success");
+      }
+    );
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Workouts</Text>
       <ScrollView style={styles.scrollView}>
         <View style={styles.boxList}>
-          {workouts.map((workout, i) => (
-            <View key={i} style={styles.box}>
-              <Text style={styles.boxText}>{workout}</Text>
+          {workouts.map((workout) => (
+            <View key={workout.id} style={styles.box}>
+              <Text style={styles.boxText}>{workout.label}</Text>
+              <Pressable onPress={() => {
+                db.transaction((tx) => {
+                  tx.executeSql('DELETE FROM workouts WHERE id = ?', [workout.id])
+                  tx.executeSql(
+                    "Select * from workouts",
+                    [],
+                    (_, { rows: { _array: workouts } }) => {
+                      setWorkouts(workouts);
+                    }
+                  );
+                })
+              }}>
+                <FontAwesome5 size={24} color={Colors.red[500]} name="window-close" />
+              </Pressable>
             </View>
           ))}
         </View>
@@ -26,7 +88,23 @@ export default function TabOneScreen() {
             require("../../assets/sounds/tap.wav")
           );
           sound.playAsync();
-          setWorkouts([...workouts, "workout #" + workouts.length]);
+          console.log("click");
+
+          db.transaction(
+            (tx) => {
+              tx.executeSql('INSERT into workouts (label) values ("workout")');
+              tx.executeSql(
+                "Select * from workouts",
+                [],
+                (_, { rows: { _array: workouts } }) => {
+                  setWorkouts(workouts);
+                }
+              );
+            },
+            (err) => {
+              console.log(err);
+            }
+          );
         }}
         style={styles.addButton}
       >
@@ -70,6 +148,8 @@ const styles = StyleSheet.create({
     height: 160,
     backgroundColor: Colors.gray[900],
     borderRadius: 16,
+    flexDirection: "row",
+    gap: 16,
     alignItems: "center",
     justifyContent: "center",
   },
