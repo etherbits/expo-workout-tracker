@@ -12,14 +12,14 @@ import Colors from "../../constants/Colors";
 import { useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import * as SQLite from "expo-sqlite";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 function openDatabase() {
   if (Platform.OS === "web") {
     return {
       transaction: () => {
         return {
-          executeSql: () => { },
+          executeSql: () => {},
         };
       },
     };
@@ -39,6 +39,7 @@ type workout = {
 export default function TabOneScreen() {
   const [workouts, setWorkouts] = useState<workout[]>([]);
 
+  const router = useRouter();
   useEffect(() => {
     console.log("running...");
 
@@ -66,7 +67,7 @@ export default function TabOneScreen() {
 
   const removeWorkout = (workoutId: number) => {
     db.transaction((tx) => {
-      tx.executeSql('DELETE FROM workouts WHERE id = ?', [workoutId])
+      tx.executeSql("DELETE FROM workouts WHERE id = ?", [workoutId]);
       tx.executeSql(
         "Select * from workouts",
         [],
@@ -74,8 +75,8 @@ export default function TabOneScreen() {
           setWorkouts(workouts);
         }
       );
-    })
-  }
+    });
+  };
 
   const addWorkout = async () => {
     const { sound } = await Audio.Sound.createAsync(
@@ -83,10 +84,17 @@ export default function TabOneScreen() {
     );
     sound.playAsync();
     console.log("click");
+    let id: number | undefined = undefined;
 
     db.transaction(
       (tx) => {
-        tx.executeSql(`INSERT into workouts (label) values ("workout ${Date.now().toString()}")`);
+        tx.executeSql(
+          `INSERT into workouts (label) values ("")`,
+          [],
+          (_, { insertId }) => {
+            id = insertId;
+          }
+        );
         tx.executeSql(
           "Select * from workouts",
           [],
@@ -97,9 +105,14 @@ export default function TabOneScreen() {
       },
       (err) => {
         console.log(err);
+      },
+      () => {
+        if (id && router) {
+          router.push(`workout/${id}`);
+        }
       }
     );
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -107,21 +120,24 @@ export default function TabOneScreen() {
       <ScrollView style={styles.scrollView}>
         <View style={styles.boxList}>
           {workouts.map((workout) => (
-
-            <Link href={`/workout/${workout.id}`} key={workout.id} style={styles.box}>
+            <Link
+              href={`/workout/${workout.id}`}
+              key={workout.id}
+              style={styles.box}
+            >
               <Text style={styles.boxText}>{workout.label}</Text>
               <Pressable onPress={() => removeWorkout(workout.id)}>
-                <FontAwesome5 size={24} color={Colors.red[500]} name="window-close" />
+                <FontAwesome5
+                  size={24}
+                  color={Colors.red[500]}
+                  name="window-close"
+                />
               </Pressable>
             </Link>
-
           ))}
         </View>
       </ScrollView>
-      <Pressable
-        onPress={addWorkout}
-        style={styles.addButton}
-      >
+      <Pressable onPress={addWorkout} style={styles.addButton}>
         <FontAwesome5 size={24} color={Colors.gray[50]} name="plus" />
       </Pressable>
     </View>
