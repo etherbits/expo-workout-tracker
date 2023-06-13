@@ -38,6 +38,15 @@ db.transaction(
     tx.executeSql(
       "create TABLE if not EXISTS workouts (id integer primary key not null, label text);"
     );
+    tx.executeSql(
+      `create TABLE if not EXISTS exercises (id INTEGER PRIMARY KEY NOT null,
+        name TEXT, duration INTEGER, sets INTEGER, reps INTEGER, placement INTEGER);`
+    );
+    tx.executeSql(
+      `create TABLE if not EXISTS workout_exercises (id INTEGER PRIMARY KEY NOT NULL,
+        workout_id INTEGER, exercise_id INTEGER, FOREIGN KEY (workout_id) References workouts(id), 
+        FOREIGN KEY (exercise_id) REFERENCES exercises(id));`
+    );
   },
   (err) => {
     console.log("Failed to create workout table", err);
