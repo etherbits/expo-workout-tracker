@@ -13,13 +13,14 @@ import { useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import * as SQLite from "expo-sqlite";
 import { Link, useRouter } from "expo-router";
+import useWorkoutStore from "../../stores/workouts";
 
 function openDatabase() {
   if (Platform.OS === "web") {
     return {
       transaction: () => {
         return {
-          executeSql: () => {},
+          executeSql: () => { },
         };
       },
     };
@@ -37,81 +38,31 @@ type workout = {
 };
 
 export default function TabOneScreen() {
-  const [workouts, setWorkouts] = useState<workout[]>([]);
+  const [workouts, fetchWorkouts, addWorkout, removeWorkout] = useWorkoutStore(
+    (store) => [
+      store.workouts,
+      store.fetchWorkouts,
+      store.addWorkout,
+      store.removeWorkout,
+    ]
+  );
 
   const router = useRouter();
-  useEffect(() => {
-    console.log("running...");
 
-    db.transaction(
-      (tx) => {
-        tx.executeSql(
-          "create TABLE if not EXISTS workouts (id integer primary key not null, label text);"
-        );
-        tx.executeSql(
-          "Select * from workouts",
-          [],
-          (_, { rows: { _array: workouts } }) => {
-            setWorkouts(workouts);
-          }
-        );
-      },
-      (err) => {
-        console.log(err);
-      },
-      () => {
-        console.log("success");
-      }
-    );
+  useEffect(() => {
+    fetchWorkouts();
   }, []);
 
-  const removeWorkout = (workoutId: number) => {
-    db.transaction((tx) => {
-      tx.executeSql("DELETE FROM workouts WHERE id = ?", [workoutId]);
-      tx.executeSql(
-        "Select * from workouts",
-        [],
-        (_, { rows: { _array: workouts } }) => {
-          setWorkouts(workouts);
-        }
-      );
-    });
-  };
-
-  const addWorkout = async () => {
+  const add = async () => {
     const { sound } = await Audio.Sound.createAsync(
       require("../../assets/sounds/tap.wav")
     );
-    sound.playAsync();
-    console.log("click");
-    let id: number | undefined = undefined;
 
-    db.transaction(
-      (tx) => {
-        tx.executeSql(
-          `INSERT into workouts (label) values ("")`,
-          [],
-          (_, { insertId }) => {
-            id = insertId;
-          }
-        );
-        tx.executeSql(
-          "Select * from workouts",
-          [],
-          (_, { rows: { _array: workouts } }) => {
-            setWorkouts(workouts);
-          }
-        );
-      },
-      (err) => {
-        console.log(err);
-      },
-      () => {
-        if (id && router) {
-          router.push(`workout/${id}`);
-        }
-      }
-    );
+    sound.playAsync();
+
+    const id = addWorkout();
+    router.push(`/workout/${id}`)
+
   };
 
   return (
@@ -137,7 +88,7 @@ export default function TabOneScreen() {
           ))}
         </View>
       </ScrollView>
-      <Pressable onPress={addWorkout} style={styles.addButton}>
+      <Pressable onPress={add} style={styles.addButton}>
         <FontAwesome5 size={24} color={Colors.gray[50]} name="plus" />
       </Pressable>
     </View>
