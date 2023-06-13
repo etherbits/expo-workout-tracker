@@ -1,5 +1,5 @@
 import { useLocalSearchParams, usePathname } from "expo-router";
-import { Platform, Text, TextInput, View } from "react-native";
+import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import * as SQLite from "expo-sqlite";
 import Colors from "../../constants/Colors";
 import useWorkoutStore from "../../stores/workouts";
@@ -9,23 +9,23 @@ export default function Workout() {
   const pathname = usePathname();
   const { id } = useLocalSearchParams();
 
-  const [getWorkout, updateWorkout] = useWorkoutStore((state) => [
+  const [getWorkout, updateWorkout, addExercise] = useWorkoutStore((state) => [
     state.getWorkout,
     state.updateWorkout,
+    state.addExercise,
   ]);
 
   const [label, setLabel] = useState("");
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
     const setDataFromDB = async () => {
-      const workout = await getWorkout(+id)
-      setLabel(workout?.label || "")
-    }
+      const workout = await getWorkout(+id);
+      setLabel(workout?.label || "");
+    };
 
-    setDataFromDB()
-
-  }, [])
+    setDataFromDB();
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -42,6 +42,19 @@ export default function Workout() {
           setLabel(e.nativeEvent.text);
         }}
       />
+      <Pressable
+        onPress={() => {
+          if (!id) return;
+          addExercise(+id, {
+            name: "push ups",
+            placement: 0,
+            sets: 2,
+            reps: 12,
+          });
+        }}
+      >
+        <Text>add</Text>
+      </Pressable>
     </View>
   );
 }

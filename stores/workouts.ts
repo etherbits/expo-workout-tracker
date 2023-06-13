@@ -7,6 +7,14 @@ type Workout = {
   label: string;
 };
 
+type Exercise = {
+  name: string;
+  reps: number;
+  placement: number;
+  sets?: number;
+  duration?: number;
+};
+
 interface WorkoutStore {
   workouts: Workout[];
   fetchWorkouts: () => void;
@@ -14,6 +22,7 @@ interface WorkoutStore {
   addWorkout: (label?: string) => Promise<number | undefined>;
   updateWorkout: (id: number, label: string) => void;
   removeWorkout: (id: number) => void;
+  addExercise: (workoutId: number, exercise: Exercise) => void;
 }
 
 function openDatabase() {
@@ -133,6 +142,28 @@ const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
       tx.executeSql("DELETE FROM workouts WHERE id = ?", [id]);
     });
     fetchWorkouts();
+  },
+  addExercise: (workoutId, exercise) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `INSERT INTO exercises (name, reps, placement, sets, duration) VALUES (?, ?, ?, ?, ?)`,
+        [
+          exercise.name,
+          exercise.reps,
+          exercise.placement,
+          exercise.sets || null,
+          exercise.duration || null,
+        ],
+        (_, { insertId }) => {
+          if (!insertId) return;
+
+          tx.executeSql(
+            "INSERT INTO workout_exercises (workout_id, exercise_id) VALUES (?, ?)",
+            [workoutId, insertId]
+          );
+        }
+      );
+    });
   },
 }));
 
