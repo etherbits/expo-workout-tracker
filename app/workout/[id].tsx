@@ -18,12 +18,12 @@ export default function Workout() {
 
   useEffect(() => {
     if (!id) return
-    const gw = async () => {
+    const setDataFromDB = async () => {
       const workout = await getWorkout(+id)
       setLabel(workout?.label || "")
     }
 
-    gw()
+    setDataFromDB()
 
   }, [])
 
