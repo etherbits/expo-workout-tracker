@@ -22,6 +22,7 @@ interface WorkoutStore {
   addWorkout: (label?: string) => Promise<number | undefined>;
   updateWorkout: (id: number, label: string) => void;
   removeWorkout: (id: number) => void;
+  fetchExercises: (workoutId: number) => Promise<Exercise[]>;
   addExercise: (workoutId: number, exercise: Exercise) => void;
 }
 
@@ -142,6 +143,25 @@ const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
       tx.executeSql("DELETE FROM workouts WHERE id = ?", [id]);
     });
     fetchWorkouts();
+  },
+  fetchExercises: async (workoutId) => {
+    return await new Promise((resolve) => {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM workout_exercises WHERE workout_id = ?",
+          [workoutId],
+          (_, { rows: { _array: workoutExercises } }) => {
+            tx.executeSql(
+              "SELECT * FROM exercises WHERE id = ?",
+              [workoutExercises[0]],
+              (_, { rows: { _array: exercises } }) => {
+                resolve(exercises);
+              }
+            );
+          }
+        );
+      });
+    });
   },
   addExercise: (workoutId, exercise) => {
     db.transaction((tx) => {
