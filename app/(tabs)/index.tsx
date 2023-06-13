@@ -60,7 +60,7 @@ export default function TabOneScreen() {
 
     sound.playAsync();
 
-    const id = addWorkout();
+    const id = await addWorkout();
     router.push(`/workout/${id}`)
 
   };

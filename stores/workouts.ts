@@ -10,7 +10,8 @@ type Workout = {
 interface WorkoutStore {
   workouts: Workout[];
   fetchWorkouts: () => void;
-  addWorkout: (label?: string) => number | undefined;
+  getWorkout: (id: number) => Promise<Workout | undefined>;
+  addWorkout: (label?: string) => Promise<number | undefined>;
   updateWorkout: (id: number, label: string) => void;
   removeWorkout: (id: number) => void;
 }
@@ -20,7 +21,7 @@ function openDatabase() {
     return {
       transaction: () => {
         return {
-          executeSql: () => { },
+          executeSql: () => {},
         };
       },
     };
@@ -52,7 +53,7 @@ const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
     db.transaction(
       (tx) => {
         tx.executeSql(
-          "Select * from workouts",
+          "SELECT * FROM workouts",
           [],
           (_, { rows: { _array: workouts } }) => {
             set({ workouts });
@@ -67,39 +68,52 @@ const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
       }
     );
   },
-  addWorkout: (label = "") => {
-    let id: number | undefined = undefined;
-
+  getWorkout: async (id) => {
+    return await new Promise((resolve) => {
+      db.transaction(
+        (tx) => {
+          tx.executeSql(
+            `SELECT * FROM workouts WHERE id = ? LIMIT 1`,
+            [id],
+            (_, { rows: { _array: workouts } }) => {
+              resolve(workouts[0]);
+            }
+          );
+        },
+        (err) => {
+          console.log(err);
+        }
+      );
+    });
+  },
+  addWorkout: async (label = "") => {
     const { fetchWorkouts } = get();
 
-    db.transaction(
-      (tx) => {
-        tx.executeSql(
-          `INSERT into workouts (label) values (?)`,
-          [label],
-          (_, { insertId }) => {
-            id = insertId;
-            console.log("set ", id);
-          }
-        );
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
-
-    fetchWorkouts();
-
-    return id;
+    return await new Promise((resolve) => {
+      db.transaction(
+        (tx) => {
+          tx.executeSql(
+            `INSERT into workouts (label) values (?)`,
+            [label],
+            (_, { insertId }) => {
+              resolve(insertId);
+            }
+          );
+        },
+        (err) => {
+          console.log(err);
+        },
+        () => {
+          fetchWorkouts();
+        }
+      );
+    });
   },
   updateWorkout: (id, label) => {
     const { fetchWorkouts } = get();
 
     db.transaction((tx) => {
-      tx.executeSql(`UPDATE workouts SET label = ? WHERE id = ?;`, [
-        label,
-        id,
-      ]);
+      tx.executeSql(`UPDATE workouts SET label = ? WHERE id = ?;`, [label, id]);
     });
 
     fetchWorkouts();
