@@ -9,11 +9,13 @@ export default function Workout() {
   const pathname = usePathname();
   const { id } = useLocalSearchParams();
 
-  const [getWorkout, updateWorkout, addExercise] = useWorkoutStore((state) => [
-    state.getWorkout,
-    state.updateWorkout,
-    state.addExercise,
-  ]);
+  const [getWorkout, updateWorkout, addExercise, fetchExercises] =
+    useWorkoutStore((state) => [
+      state.getWorkout,
+      state.updateWorkout,
+      state.addExercise,
+      state.fetchExercises,
+    ]);
 
   const [label, setLabel] = useState("");
 
@@ -51,6 +53,8 @@ export default function Workout() {
             sets: 2,
             reps: 12,
           });
+
+          console.log(fetchExercises(+id));
         }}
       >
         <Text>add</Text>
