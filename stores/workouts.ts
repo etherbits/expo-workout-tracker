@@ -31,7 +31,7 @@ function openDatabase() {
     return {
       transaction: () => {
         return {
-          executeSql: () => {},
+          executeSql: () => { },
         };
       },
     };
@@ -152,9 +152,13 @@ const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
           [workoutId],
           (_, { rows: { _array: workoutExercises } }) => {
             tx.executeSql(
-              "SELECT * FROM exercises WHERE id = ?",
-              [workoutExercises[0]],
+              `SELECT * FROM exercises WHERE id in (
+                ${workoutExercises.map((table) => table.exercise_id).join(", ")}
+              ) 
+              `,
+              [],
               (_, { rows: { _array: exercises } }) => {
+                console.log(exercises);
                 resolve(exercises);
               }
             );

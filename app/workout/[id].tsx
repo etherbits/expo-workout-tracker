@@ -45,19 +45,22 @@ export default function Workout() {
         }}
       />
       <Pressable
-        onPress={() => {
+        onPress={async() => {
           if (!id) return;
+
           addExercise(+id, {
             name: "push ups",
             placement: 0,
             sets: 2,
             reps: 12,
           });
+          console.log("here")
 
-          console.log(fetchExercises(+id));
+          console.log(await fetchExercises(+id));
+          console.log('there')
         }}
       >
-        <Text>add</Text>
+        <Text style={{ color: Colors.red[500] }}>add</Text>
       </Pressable>
     </View>
   );
