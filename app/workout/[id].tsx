@@ -45,7 +45,7 @@ export default function Workout() {
         }}
       />
       <Pressable
-        onPress={async() => {
+        onPress={async () => {
           if (!id) return;
 
           addExercise(+id, {
@@ -54,10 +54,10 @@ export default function Workout() {
             sets: 2,
             reps: 12,
           });
-          console.log("here")
+          console.log("here");
 
           console.log(await fetchExercises(+id));
-          console.log('there')
+          console.log("there");
         }}
       >
         <Text style={{ color: Colors.red[500] }}>add</Text>

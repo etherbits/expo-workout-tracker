@@ -31,7 +31,7 @@ function openDatabase() {
     return {
       transaction: () => {
         return {
-          executeSql: () => { },
+          executeSql: () => {},
         };
       },
     };
@@ -148,20 +148,12 @@ const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
     return await new Promise((resolve) => {
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM workout_exercises WHERE workout_id = ?",
+          `SELECT * FROM workout_exercises
+            INNER JOIN exercises ON exercises.id = workout_exercises.exercise_id 
+            WHERE workout_id = ?`,
           [workoutId],
           (_, { rows: { _array: workoutExercises } }) => {
-            tx.executeSql(
-              `SELECT * FROM exercises WHERE id in (
-                ${workoutExercises.map((table) => table.exercise_id).join(", ")}
-              ) 
-              `,
-              [],
-              (_, { rows: { _array: exercises } }) => {
-                console.log(exercises);
-                resolve(exercises);
-              }
-            );
+            resolve(workoutExercises);
           }
         );
       });
