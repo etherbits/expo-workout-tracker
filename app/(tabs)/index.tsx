@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   Platform,
   Pressable,
   ScrollView,
@@ -20,7 +21,7 @@ function openDatabase() {
     return {
       transaction: () => {
         return {
-          executeSql: () => { },
+          executeSql: () => {},
         };
       },
     };
@@ -31,11 +32,6 @@ function openDatabase() {
 }
 
 const db = openDatabase();
-
-type workout = {
-  id: number;
-  label: string;
-};
 
 export default function TabOneScreen() {
   const [workouts, fetchWorkouts, addWorkout, removeWorkout] = useWorkoutStore(
@@ -61,8 +57,7 @@ export default function TabOneScreen() {
     sound.playAsync();
 
     const id = await addWorkout();
-    router.push(`/workout/${id}`)
-
+    router.push(`/workout/${id}`);
   };
 
   return (
@@ -71,18 +66,18 @@ export default function TabOneScreen() {
       <ScrollView style={styles.scrollView}>
         <View style={styles.boxList}>
           {workouts.map((workout) => (
-            <Link
-              href={`/workout/${workout.id}`}
-              key={workout.id}
-              style={styles.box}
-            >
-              <Text style={styles.boxText}>{workout.label}</Text>
-              <Pressable onPress={() => removeWorkout(workout.id)}>
-                <FontAwesome5
-                  size={24}
-                  color={Colors.red[500]}
-                  name="window-close"
-                />
+            <Link href={`/workout/${workout.id}`} asChild>
+              <Pressable>
+                <View key={workout.id} style={styles.box}>
+                  <Pressable onPress={() => removeWorkout(workout.id)}>
+                    <FontAwesome5
+                      size={24}
+                      color={Colors.red[500]}
+                      name="window-close"
+                    />
+                  </Pressable>
+                  <Text style={styles.boxText}>{workout.label}</Text>
+                </View>
               </Pressable>
             </Link>
           ))}
@@ -125,7 +120,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   box: {
-    width: "100%",
+    flexGrow: 1,
     height: 160,
     backgroundColor: Colors.gray[900],
     borderRadius: 16,
