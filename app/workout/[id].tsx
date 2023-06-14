@@ -4,10 +4,12 @@ import * as SQLite from "expo-sqlite";
 import Colors from "../../constants/Colors";
 import useWorkoutStore from "../../stores/workouts";
 import { useEffect, useState } from "react";
+import type { Exercise } from "../../stores/workouts";
 
 export default function Workout() {
   const pathname = usePathname();
   const { id } = useLocalSearchParams();
+  const [exercises, setExercises] = useState<Exercise[]>([]);
 
   const [getWorkout, updateWorkout, addExercise, fetchExercises] =
     useWorkoutStore((state) => [
@@ -24,6 +26,7 @@ export default function Workout() {
     const setDataFromDB = async () => {
       const workout = await getWorkout(+id);
       setLabel(workout?.label || "");
+      setExercises(await fetchExercises(+id));
     };
 
     setDataFromDB();
@@ -54,14 +57,19 @@ export default function Workout() {
             sets: 2,
             reps: 12,
           });
-          console.log("here");
 
-          console.log(await fetchExercises(+id));
-          console.log("there");
+          setExercises(await fetchExercises(+id));
         }}
       >
         <Text style={{ color: Colors.red[500] }}>add</Text>
       </Pressable>
+      {exercises.map((exercise) => {
+        return (
+          <View key={exercise.id}>
+            <Text style={{ color: Colors.gray[200] }}>{exercise.name}</Text>
+          </View>
+        );
+      })}
     </View>
   );
 }

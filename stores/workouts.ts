@@ -2,12 +2,13 @@ import { create } from "zustand";
 import { Platform } from "react-native";
 import * as SQLite from "expo-sqlite";
 
-type Workout = {
+export type Workout = {
   id: number;
   label: string;
 };
 
-type Exercise = {
+export type Exercise = {
+  id: number;
   name: string;
   reps: number;
   placement: number;
@@ -23,7 +24,7 @@ interface WorkoutStore {
   updateWorkout: (id: number, label: string) => void;
   removeWorkout: (id: number) => void;
   fetchExercises: (workoutId: number) => Promise<Exercise[]>;
-  addExercise: (workoutId: number, exercise: Exercise) => void;
+  addExercise: (workoutId: number, exercise: Omit<Exercise, "id">) => void;
 }
 
 function openDatabase() {
